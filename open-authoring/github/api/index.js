@@ -67,10 +67,6 @@ const getContent = async (repoFullName, headBranch, path, accessToken) => {
     headers: {
       Authorization: 'token ' + accessToken,
     },
-  }).then( resp => {
-    return resp
-  }).catch( err => {
-    return err
   })
 }
 
@@ -120,7 +116,8 @@ const createFork = (repoFullName, accessToken) => {
   })
 }
 
-const getBranch = async (repoFullName, branch) => { // uses proxy
+const getBranch = async (repoFullName, branch) => {
+  // uses proxy
   try {
     const response = await fetch(`/api/proxy-github`, {
       method: 'POST',
@@ -140,7 +137,8 @@ const getBranch = async (repoFullName, branch) => { // uses proxy
   }
 }
 
-const getUser =  async() => { // uses proxy
+const getUser = async () => {
+  // uses proxy
   try {
     const response = await fetch(`/api/proxy-github`, {
       method: 'POST',
@@ -160,7 +158,7 @@ const getUser =  async() => { // uses proxy
   }
 }
 
-const isForkValid = async (forkName) => {
+const isForkValid = async forkName => {
   if (!forkName) {
     return false
   }
@@ -191,5 +189,5 @@ module.exports = {
   getBranch,
   getUser,
   isForkValid,
-  isGithubTokenValid
+  isGithubTokenValid,
 }

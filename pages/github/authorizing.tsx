@@ -13,19 +13,15 @@ export default function Authorizing() {
   }
 
   useEffect(() => {
-    ( async () => {
+    ;(async () => {
       const urlParams = new URLSearchParams(window.location.search)
       const code = urlParams.get('code')
       const state = urlParams.get('state')
-      // localStorage.setItem('github_code', code)
 
       await handleAuthCode(code, state)
 
-      window.location.assign(
-        "/github/fork"
-      )
+      window.location.assign('/github/fork')
     })()
-    
   }, [])
   return (
     <AuthLayout>

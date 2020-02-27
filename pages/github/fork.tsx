@@ -7,11 +7,10 @@ import { Button } from '../../components/ui'
 import styled from 'styled-components'
 
 export default function Authorizing() {
-
   async function handleForkCreated(forkName: string) {
     Cookies.set('fork_full_name', forkName, { sameSite: 'strict' })
-    await fetch(`/api/preview`)   
-    
+    await fetch(`/api/preview`)
+
     window.opener.window.location.href = window.opener.window.location.pathname
   }
 
@@ -52,7 +51,7 @@ export default function Authorizing() {
       const forkData = await getBranch(expectedFork, branch)
       if (!forkData) return setForkValidating(false)
       if (forkData.ref === 'refs/heads/' + branch) {
-        // found fork\
+        // found fork
         Cookies.set('head_branch', branch)
         await handleForkCreated(expectedFork)
         window.close()

@@ -283,7 +283,7 @@ export async function unstable_getStaticProps({ preview, previewData, query }) {
   return {
     props: {
       home: homeData,
-      previewError: previewError,
+      previewError,
       sourceProviderConnection,
       editMode: !!preview,
     },

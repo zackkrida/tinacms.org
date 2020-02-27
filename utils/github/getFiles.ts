@@ -1,22 +1,20 @@
-import { getContent } from '../../open-authoring/github/api'
 import { SourceProviderConnection } from './sourceProviderConnection'
 import path from 'path'
+import getDecodedData from './getDecodedData'
 
 const getFiles = async (
   filePath: string,
   sourceProviderConnection: SourceProviderConnection
 ) => {
   if (sourceProviderConnection) {
-    const response = await getContent(
+    const { data } = await getDecodedData(
       sourceProviderConnection.forkFullName,
       sourceProviderConnection.headBranch || 'master',
       filePath,
       sourceProviderConnection.accessToken
     )
 
-    return response.data
-      .filter(file => file.type === 'file')
-      .map(file => file.path)
+    return data.filter(file => file.type === 'file').map(file => file.path)
   } else {
     // grab all md files
     const fg = require('fast-glob')
