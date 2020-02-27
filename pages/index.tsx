@@ -60,7 +60,7 @@ const HomePage = (props: any) => {
           //@ts-ignore
           itemProps: item => ({
             key: item.id,
-            label: `${item.main.slice(0, 15)}...`,
+            label: `${safeSlice(item.main, 0, 15)}...`,
           }),
           defaultItem: () => ({
             main: 'New Point',
@@ -94,7 +94,7 @@ const HomePage = (props: any) => {
           //@ts-ignore
           itemProps: item => ({
             key: item.id,
-            label: `${item.step.slice(0, 15)}...`,
+            label: `${safeSlice(item.step, 0, 15)}...`,
           }),
           defaultItem: () => ({
             step: 'New Step',
@@ -300,7 +300,7 @@ export async function unstable_getStaticProps({ preview, previewData, query }) {
 function SellingPoint({ data, index }) {
   return (
     <BlocksControls index={index}>
-      <div key={data.main.slice(0, 8)}>
+      <div key={safeSlice(data.main, 0, 8)}>
         <h3>
           <em>
             <BlockTextArea name="main" />
@@ -337,7 +337,7 @@ const SELLING_POINTS_BLOCKS = {
 function SetupPoint({ data, index }) {
   return (
     <BlocksControls index={index}>
-      <li key={data.step.slice(0, 8)}>
+      <li key={safeSlice(data.step, 0, 8)}>
         <BlockTextArea name="step" />
       </li>
     </BlocksControls>
@@ -441,3 +441,7 @@ const CtaBar = styled.div`
     }
   }
 `
+
+const safeSlice = (text: string | undefined, start: number, end: number) => {
+  return (text || '').slice(start, end)
+}
