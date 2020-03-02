@@ -8,13 +8,18 @@ export async function getDocProps({ preview, previewData }: any, slug: string) {
     `content/docs/${slug}.md`,
     sourceProviderConnection
   )
-
-  const getJson = async (filePath: string) => {
-    return (await getJsonData(filePath, sourceProviderConnection)).data
-  }
-
-  const getMarkdown = async (filePath: string) => {
-    return (await getMarkdownData(filePath, sourceProviderConnection)).data
+  
+  var getJson, getMarkdown
+  try {
+    getJson = async (filePath: string) => {
+      return (await getJsonData(filePath, sourceProviderConnection)).data
+    }
+  
+    getMarkdown = async (filePath: string) => {
+      return (await getMarkdownData(filePath, sourceProviderConnection)).data
+    }
+  } catch (e) {
+    throw e
   }
 
   const docsNavData = await getJson('content/toc-doc.json')
