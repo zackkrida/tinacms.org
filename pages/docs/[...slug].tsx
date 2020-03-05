@@ -1,10 +1,6 @@
-import React, { useState, useMemo } from 'react'
-import matter from 'gray-matter'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 import { NextSeo } from 'next-seo'
-import { InlineForm } from 'react-tinacms-inline'
-
-import { formatExcerpt, readFile } from '../../utils'
 import {
   DocsLayout,
   MarkdownContent,
@@ -19,22 +15,18 @@ import {
   Overlay,
   DocsPagination,
 } from '../../components/ui'
-import { InlineWysiwyg, InlineTextField } from '../../components/ui/inline'
+import { InlineWysiwyg, InlineTextareaField } from '../../components/ui/inline'
 import { TinaIcon } from '../../components/logo'
-import getMarkdownData from '../../utils/github/getMarkdownData'
-import { getGithubDataFromPreviewProps } from '../../utils/github/sourceProviderConnection'
 import { useLocalGithubMarkdownForm } from '../../utils/github/useLocalGithubMarkdownForm'
-import { setIsEditMode } from '../../utils'
-import getJsonData from '../../utils/github/getJsonData'
 import { getDocProps } from '../../utils/docs/getDocProps'
+import OpenAuthoringSiteForm from '../../components/layout/OpenAuthoringSiteForm'
+import ContentNotFoundError from '../../utils/github/ContentNotFoundError'
+import { OpenAuthoringModalContainer } from '../../open-authoring/OpenAuthoringModalContainer'
 
 export default function DocTemplate(props) {
-  // Sets sidebar.hidden based on preview props
-  setIsEditMode(props.editMode)
-
   // Workaround for fallback being not implemented
   if (!props.markdownFile) {
-    return <div></div>
+    return <OpenAuthoringModalContainer previewError={props.previewError} />
   }
 
   // Registers Tina Form
@@ -47,11 +39,16 @@ export default function DocTemplate(props) {
   const [open, setOpen] = useState(false)
   const frontmatter = data.frontmatter
   const markdownBody = data.markdownBody
-  const excerpt = formatExcerpt(props.markdownFile.data.markdownBody)
+  const excerpt = props.markdownFile.data.excerpt
 
   return (
-    <InlineForm form={form}>
-      <DocsLayout>
+    <OpenAuthoringSiteForm
+      form={form}
+      path={props.markdownFile.fileRelativePath}
+      editMode={props.editMode}
+      previewError={props.previewError}
+    >
+      <DocsLayout isEditing={props.editMode}>
         <NextSeo
           title={frontmatter.title}
           titleTemplate={'%s | TinaCMS Docs'}
@@ -79,18 +76,8 @@ export default function DocTemplate(props) {
           <DocsHeaderNav color={'light'} open={open} />
           <RichTextWrapper>
             <Wrapper narrow>
-              {/*
-               *** Inline controls shouldn't render
-               *** until we're ready for Inline release
-               */}
-              {/*
-                <InlineControls>
-                <EditToggle />
-                <DiscardButton />
-                </InlineControls>
-              */}
               <h1>
-                <InlineTextField name="frontmatter.title" />
+                <InlineTextareaField name="frontmatter.title" />
               </h1>
               <hr />
               <InlineWysiwyg name="markdownBody">
@@ -102,11 +89,11 @@ export default function DocTemplate(props) {
               />
             </Wrapper>
           </RichTextWrapper>
-          <Footer light />
+          <Footer light editMode={props.editMode} />
         </DocsContent>
         <Overlay open={open} onClick={() => setOpen(false)} />
       </DocsLayout>
-    </InlineForm>
+    </OpenAuthoringSiteForm>
   )
 }
 
@@ -118,7 +105,20 @@ export async function unstable_getStaticProps(props) {
   let { slug: slugs } = props.params
 
   const slug = slugs.join('/')
-  return getDocProps(props, slug)
+
+  try {
+    return getDocProps(props, slug)
+  } catch (e) {
+    if (e instanceof ContentNotFoundError) {
+      return {
+        props: {
+          previewError: e.message,
+        },
+      }
+    } else {
+      throw e
+    }
+  }
 }
 
 export async function unstable_getStaticPaths() {
@@ -196,7 +196,7 @@ const DocsTinaIcon = styled(TinaIcon)`
     left: 2rem;
     transform: translate3d(0, -50%, 0);
     position: fixed;
-    top: 2.5rem;
+    margin-top: 2.5rem;
     left: 2rem;
   }
 `

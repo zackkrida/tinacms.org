@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import styled from 'styled-components'
 import { NextSeo } from 'next-seo'
 import getFiles from '../../../utils/github/getFiles'
@@ -13,50 +13,66 @@ import {
 import { DynamicLink, BlogPagination } from '../../../components/ui'
 import { getGithubDataFromPreviewProps } from '../../../utils/github/sourceProviderConnection'
 import getMarkdownData from '../../../utils/github/getMarkdownData'
-
+import { useCMS } from 'tinacms'
+import OpenAuthoringSiteForm from '../../../components/layout/OpenAuthoringSiteForm'
+import { useForm } from 'tinacms'
 const Index = props => {
   const { currentPage, numPages } = props
+
+  const cms = useCMS()
 
   //workaround for fallback being not implemented
   if (!props.posts) {
     return <div></div>
   }
 
+  const [, form] = useForm({
+    id: 'blog-list',
+    label: 'Blog',
+    fields: [],
+    onSubmit: () => {},
+  })
+
   return (
-    <Layout>
-      <NextSeo
-        title="Blog"
-        openGraph={{
-          title: 'Blog',
-        }}
-      />
-      <Hero mini></Hero>
-      <BlogWrapper>
-        {props.posts.map(post => (
-          <DynamicLink
-            key={post.data.slug}
-            href={`/blog/${post.data.slug}`}
-            passHref
-          >
-            <BlogExcerpt>
-              <BlogTitle>{post.data.title}</BlogTitle>
-              <RichTextWrapper>
-                <BlogMeta>
-                  <p>
-                    <span>By</span> {post.data.author}
-                  </p>
-                  <p>{formatDate(post.data.date)}</p>
-                </BlogMeta>
-                <MarkdownContent skipHtml={true} content={post.content} />
-                <hr />
-              </RichTextWrapper>
-              <br />
-            </BlogExcerpt>
-          </DynamicLink>
-        ))}
-        <BlogPagination currentPage={currentPage} numPages={numPages} />
-      </BlogWrapper>
-    </Layout>
+    <OpenAuthoringSiteForm editMode={props.editMode} form={form} path={''}>
+      <Layout
+        sourceProviderConnection={props.sourceProviderConnection}
+        editMode={props.editMode}
+      >
+        <NextSeo
+          title="Blog"
+          openGraph={{
+            title: 'Blog',
+          }}
+        />
+        <Hero mini></Hero>
+        <BlogWrapper>
+          {props.posts.map(post => (
+            <DynamicLink
+              key={post.data.slug}
+              href={`/blog/${post.data.slug}`}
+              passHref
+            >
+              <BlogExcerpt>
+                <BlogTitle>{post.data.title}</BlogTitle>
+                <RichTextWrapper>
+                  <BlogMeta>
+                    <MetaBit>
+                      <span>By</span> {post.data.author}
+                    </MetaBit>
+                    <MetaBit>{formatDate(post.data.date)}</MetaBit>
+                  </BlogMeta>
+                  <MarkdownContent skipHtml={true} content={post.content} />
+                  <hr />
+                </RichTextWrapper>
+                <br />
+              </BlogExcerpt>
+            </DynamicLink>
+          ))}
+          <BlogPagination currentPage={currentPage} numPages={numPages} />
+        </BlogWrapper>
+      </Layout>
+    </OpenAuthoringSiteForm>
   )
 }
 
@@ -88,15 +104,24 @@ export async function unstable_getStaticProps({
   previewData,
   ...ctx
 }) {
-  const sourceProviderConnection = getGithubDataFromPreviewProps(previewData)
+  const {
+    sourceProviderConnection,
+    accessToken,
+  } = getGithubDataFromPreviewProps(previewData)
   let page = (ctx.params && ctx.params.page_index) || '1'
 
-  const files = await getFiles('content/blog', sourceProviderConnection)
+  const files = await getFiles(
+    'content/blog',
+    sourceProviderConnection,
+    accessToken
+  )
 
   const posts = await Promise.all(
     // TODO - potentially making a lot of requests here
     files.map(async file => {
-      const post = (await getMarkdownData(file, sourceProviderConnection)).data
+      const post = (
+        await getMarkdownData(file, sourceProviderConnection, accessToken)
+      ).data
 
       // create slug from filename
       const slug = file
@@ -127,6 +152,8 @@ export async function unstable_getStaticProps({
       posts: orderedPosts,
       numPages: numPages,
       currentPage: parseInt(page),
+      editMode: !!preview,
+      sourceProviderConnection,
     },
   }
 }
@@ -193,6 +220,16 @@ const BlogExcerpt = styled.a`
   }
 `
 
+const MetaBit = styled.p`
+  display: flex;
+  margin: 0 !important;
+
+  span {
+    opacity: 0.5;
+    margin-right: 0.25rem;
+  }
+`
+
 const BlogMeta = styled.div`
   width: 100%;
   justify-content: space-between;
@@ -202,14 +239,6 @@ const BlogMeta = styled.div`
   margin-bottom: 1.5rem;
   margin-top: -0.5rem;
   opacity: 0.5;
-  p {
-    margin: 0;
-    color: 0;
-    display: block;
-  }
-  span {
-    opacity: 0.5;
-  }
 
   @media (min-width: 550px) {
     flex-direction: row;

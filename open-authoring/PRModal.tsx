@@ -11,12 +11,10 @@ const BASE_BRANCH = process.env.BASE_BRANCH
 interface Props {
   baseRepoFullName: string
   forkRepoFullName: string
-  accessToken: string
 }
 
 export const PRModal = ({
   forkRepoFullName,
-  accessToken,
   baseRepoFullName,
 }: Props) => {
   const [responseMessage, setResponseMessage] = useState('')
@@ -34,12 +32,9 @@ export const PRModal = ({
       baseRepoFullName,
       forkRepoFullName,
       getHeadBranch(),
-      accessToken
     ).then(pull => {
       if (pull) {
-        console.log(pull)
         setFetchedPR(pull)
-        // this.name = 'View Pull Request'
       } else {
         setFetchedPR({ id: null })
       }
@@ -51,18 +46,15 @@ export const PRModal = ({
       baseRepoFullName,
       forkRepoFullName,
       getHeadBranch(),
-      accessToken,
       titleInput.current.value,
       bodyInput.current.value
     )
       .then(response => {
-        checkForPR()
+        checkForPR() // TODO - can we use PR from response instead of refetching?
       })
       .catch(err => {
-        alert(
-          setResponseMessage(
-            `PR failed (Has a PR already been created?): ${JSON.stringify(err)}`
-          )
+        setResponseMessage(
+          `Pull Request failed, are you sure you have any changes?`
         )
       })
   }

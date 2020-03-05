@@ -3,6 +3,7 @@ import { saveContent } from '../../open-authoring/github/api'
 import { getCachedFormData, setCachedFormData } from '../formCache'
 import { useGithubForm, GithubOptions, GitFile } from './useGithubForm'
 import { toMarkdownString } from 'next-tinacms-markdown'
+import { FORM_ERROR } from 'final-form'
 
 export interface Options {
   id?: string
@@ -26,19 +27,23 @@ const useGithubMarkdownForm = <T = any>(
     fields: formOptions.fields || [],
     // save & commit the file when the "save" button is pressed
     onSubmit(formData, form) {
-      saveContent(
+      return saveContent(
         githubOptions.forkFullName,
         githubOptions.branch,
         markdownFile.fileRelativePath,
-        githubOptions.accessToken,
         getCachedFormData(markdownFile.fileRelativePath).sha,
         toMarkdownString(formData),
         'Update from TinaCMS'
-      ).then(response => {
-        setCachedFormData(markdownFile.fileRelativePath, {
-          sha: response.data.content.sha,
+      )
+        .then(response => {
+          console.log(response)
+          setCachedFormData(markdownFile.fileRelativePath, {
+            sha: response.content.sha,
+          })
         })
-      })
+        .catch(e => {
+          return { [FORM_ERROR]: 'Failed to save data.' }
+        })
     },
   })
 

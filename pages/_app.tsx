@@ -8,6 +8,9 @@ import data from '../content/siteConfig.json'
 import TagManager from 'react-gtm-module'
 import { GlobalStyle } from '../components/styles/GlobalStyle'
 import { OpenAuthoring } from '../components/layout/OpenAuthoring'
+import { Toolbar } from '../components/cms/Toolbar'
+import { BrowserStorageApi } from '../utils/plugins/BrowserStorageApi'
+import { Alerts } from '../components/layout/Alerts'
 
 const MainLayout = ({ Component, pageProps }) => {
   /*
@@ -18,6 +21,10 @@ const MainLayout = ({ Component, pageProps }) => {
   const tinaConfig = {
     apis: {
       git: new GitClient('http://localhost:3000/___tina'),
+      storage:
+        typeof window !== 'undefined'
+          ? new BrowserStorageApi(window.localStorage)
+          : {},
     },
 
     sidebar: {
@@ -31,6 +38,8 @@ const MainLayout = ({ Component, pageProps }) => {
 
   return (
     <Tina cms={cms} {...tinaConfig.sidebar}>
+      <Toolbar />
+      <Alerts />
       <OpenAuthoring>
         <DefaultSeo
           title={data.seoDefaultTitle}

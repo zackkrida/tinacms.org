@@ -16,14 +16,14 @@ consumes:
     details: Creates cms instance with TinaCMS
 ---
 
-The `<Tina>` component makes it possible to attach [forms](/docs/concepts/forms) to the Tina sidebar, but we need to wire up a [backend](/docs/concepts/backends) in order for content changes to be persisted anywhere. Let's set up the default git backend.
+The `<Tina>` component makes it possible to attach [forms](/docs/forms) to the Tina sidebar, but we need to wire up a backend in order for content changes to be persisted anywhere. Let's set up the default git backend.
 
 The git backend consists of two parts:
 
 1. The server-side application that handles file manipulation and interaction with the git protocol, and
 2. The client-side adapter that allows forms registered with Tina to send data to the server-side app.
 
-Because backends in Tina are designed as [express-compatible middleware](/docs/concepts/backends), we need a way to add middleware to our Next.js dev server. To do this, we will need to use Next.js with a [custom development server](https://github.com/zeit/next.js#custom-server-and-routing) that will use Express and allow us to attach the git middleware.
+Because backends in Tina are designed as Express-compatible middleware, we need a way to add middleware to our Next.js dev server. To do this, we will need to use Next.js with a [custom development server](https://github.com/zeit/next.js#custom-server-and-routing) that will use Express and allow us to attach the git middleware.
 
 ## Installation
 
@@ -93,7 +93,10 @@ As mentioned previously, backends in Tina are written as middleware that can be 
     const server = express()
 
 +   server.use(cors())
-+   server.use('/___tina', gitApi.router())
++   server.use('/___tina', gitApi.router({
++     pathToRepo: process.cwd(),
++     pathToContent: "",
++   }))
 
     server.all('*', (req, res) => {
       return handle(req, res)
@@ -120,7 +123,7 @@ When creating an instance of `GitClient`, we need to pass it the URL where the A
 const client = new GitClient('http://localhost:3000/___tina')
 ```
 
-We'll need to amend our `_app.js` application wrapper to register this with the CMS. We can attach APIs to our CMS using the `registerApi` method.
+We'll need to amend our `_app.js` application wrapper to register this with the CMS. We can attach APIs to our CMS using the `registerApi` method. We will also want to set [`cms.media.store`](/docs/media) so we can upload images for our site.
 
 The `_app.js` file should now look something like this:
 
@@ -128,7 +131,7 @@ The `_app.js` file should now look something like this:
 import React from 'react'
 import App from 'next/app'
 import { Tina, TinaCMS } from 'tinacms'
-import { GitClient } from '@tinacms/git-client'
+import { GitClient, GitMediaStore } from '@tinacms/git-client'
 
 class MyApp extends App {
   constructor() {
@@ -136,6 +139,7 @@ class MyApp extends App {
     this.cms = new TinaCMS()
     const client = new GitClient('http://localhost:3000/___tina')
     this.cms.registerApi('git', client)
+    this.cms.media.store = new GitMediaStore(client)
   }
 
   render() {
@@ -150,4 +154,3 @@ class MyApp extends App {
 
 export default MyApp
 ```
-

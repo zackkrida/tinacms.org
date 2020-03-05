@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import Cookies from 'js-cookie'
-import { getBranch, getUser } from '../../open-authoring/github/api'
+import {
+  isForkValid,
+  isGithubTokenValid,
+} from '../../open-authoring/github/api'
 
 export interface OpenAuthoringContext {
   forkValid: boolean
   githubAuthenticated: boolean
+  updateAuthChecks: () => void
 }
 
 export const OpenAuthoringContext = React.createContext<OpenAuthoringContext | null>(
@@ -36,29 +40,10 @@ export const OpenAuthoring = ({ children }) => {
   }, [])
 
   return (
-    <OpenAuthoringContext.Provider value={{ forkValid, githubAuthenticated }}>
+    <OpenAuthoringContext.Provider
+      value={{ forkValid, githubAuthenticated, updateAuthChecks }}
+    >
       {children}
     </OpenAuthoringContext.Provider>
   )
-}
-
-const isForkValid = async (forkName: string) => {
-  if (!forkName) {
-    return false
-  }
-  const branch = Cookies.get('head_branch') || 'master'
-
-  const forkData = await getBranch(forkName, branch)
-  if (!forkData) return false
-  if (forkData.ref === 'refs/heads/' + branch) {
-    Cookies.set('head_branch', branch)
-    return true
-  }
-  return false
-}
-
-const isGithubTokenValid = async () => {
-  const userData = await getUser()
-  if (!userData) return false
-  return true
 }
