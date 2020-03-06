@@ -27,6 +27,7 @@ import { getGithubDataFromPreviewProps } from '../utils/github/sourceProviderCon
 import { useLocalGithubJsonForm } from '../utils/github/useLocalGithubJsonForm'
 import OpenAuthoringSiteForm from '../components/layout/OpenAuthoringSiteForm'
 import ContentNotFoundError from '../utils/github/ContentNotFoundError'
+import { InlineImageField } from '../components/ui/inline/InlineImageField'
 
 export default function CommunityPage({
   community,
@@ -136,6 +137,11 @@ export default function CommunityPage({
                     </DynamicLink>
                   </ButtonGroup>
                 </InfoContent>
+                <InlineImageField
+                  name="gif.src"
+                  uploadPath={filename => `public/img/blog/${filename}`}
+                  githubOptions={sourceProviderConnection}
+                />
                 <InfoImage src="/img/rico-replacement.jpg" />
               </InfoLayout>
             </Wrapper>
