@@ -1,6 +1,5 @@
 const axios = require('axios')
 const qs = require('qs')
-const { b64EncodeUnicode } = require('../../utils/base64')
 const baseBranch = process.env.BASE_BRANCH
 const Cookies = require('js-cookie')
 
@@ -78,7 +77,7 @@ const saveContent = async (
   headBranch,
   path,
   sha,
-  content,
+  encodedContent, //base64 encoded
   message
 ) => {
   const response = await fetch(`/api/proxy-github`, {
@@ -89,7 +88,7 @@ const saveContent = async (
         method: 'PUT',
         data: {
           message,
-          content: b64EncodeUnicode(content),
+          content: encodedContent,
           sha,
           branch: headBranch,
         },

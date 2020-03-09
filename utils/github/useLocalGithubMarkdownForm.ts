@@ -4,6 +4,7 @@ import { getCachedFormData, setCachedFormData } from '../formCache'
 import { useGithubForm, GithubOptions, GitFile } from './useGithubForm'
 import { toMarkdownString } from 'next-tinacms-markdown'
 import { FORM_ERROR } from 'final-form'
+import { b64EncodeUnicode } from '../../open-authoring/utils/base64'
 
 export interface Options {
   id?: string
@@ -32,7 +33,7 @@ const useGithubMarkdownForm = <T = any>(
         githubOptions.branch,
         markdownFile.fileRelativePath,
         getCachedFormData(markdownFile.fileRelativePath).sha,
-        toMarkdownString(formData),
+        b64EncodeUnicode(toMarkdownString(formData)),
         'Update from TinaCMS'
       )
         .then(response => {

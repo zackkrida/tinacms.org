@@ -2,7 +2,6 @@ import { InlineField } from 'react-tinacms-inline'
 
 interface InlineWysiwygFieldProps {
   name: string
-  children: any
 }
 
 export function InlineImage(props) {
@@ -12,7 +11,7 @@ export function InlineImage(props) {
         if (status === 'active') {
           return <ImageField input={input} />
         }
-        return <img>{props.children}</>
+        return <img />
       }}
     </InlineField>
   )
@@ -20,12 +19,12 @@ export function InlineImage(props) {
 
 //***------------ FROM TINA-------------------------- */
 import * as React from 'react'
-import { wrapFieldsWithMeta, useCMS } from 'tinacms'
+import { useCMS } from 'tinacms'
 import { InputProps, ImageUpload } from '@tinacms/fields'
 // import { useCMS } from '../../react-tinacms'
 // import { parse } from './textFormat'
 
-const parse = (value?: string) => value || '';
+const parse = (value?: string) => value || ''
 
 type FieldProps = any
 interface ImageProps {
@@ -35,7 +34,7 @@ interface ImageProps {
   clearable?: boolean // defaults to true
 }
 
-export const ImageField = wrapFieldsWithMeta<InputProps, ImageProps>(props => {
+export const ImageField = props => {
   const cms = useCMS()
 
   return (
@@ -43,9 +42,9 @@ export const ImageField = wrapFieldsWithMeta<InputProps, ImageProps>(props => {
       value={props.input.value}
       previewSrc={props.field.previewSrc(props.form.getState().values, props)}
       /*
-      ** write the custom onDrop, posts to github api 
-      ** and writes the url that gets returned
-      */
+       ** write the custom onDrop, posts to github api
+       ** and writes the url that gets returned
+       */
       onDrop={(acceptedFiles: any[]) => {
         acceptedFiles.forEach(async (file: any) => {
           await cms.api.git!.onUploadMedia!({
@@ -64,7 +63,7 @@ export const ImageField = wrapFieldsWithMeta<InputProps, ImageProps>(props => {
       }
     />
   )
-})
+}
 
 export default {
   name: 'image',

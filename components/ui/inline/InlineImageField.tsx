@@ -16,6 +16,19 @@ interface InlineImageProps {
   githubOptions: any
 }
 
+const loadFile = (file: File): Promise<string> => {
+  const reader = new FileReader()
+  return new Promise((resolve, reject) => {
+    reader.onload = event => {
+      resolve(event.target.result as string)
+    }
+    reader.onerror = event => {
+      reject('Image failed to upload')
+    }
+    return reader.readAsDataURL(file)
+  })
+}
+
 export function InlineImageField({
   name,
   uploadPath,
@@ -30,12 +43,13 @@ export function InlineImageField({
               value={props.input.value}
               onDrop={async ([file]: File[]) => {
                 const directory = uploadPath(file.name)
+                const loadedFile = await loadFile(file)
                 saveContent(
                   githubOptions.forkFullName,
                   githubOptions.branch,
                   directory,
                   getCachedFormData(directory).sha,
-                  file,
+                  loadedFile.replace(/^data:image\/[a-z]+;base64,/, ''),
                   'Update from TinaCMS'
                 )
                   .then(response => {

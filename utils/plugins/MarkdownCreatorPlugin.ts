@@ -4,6 +4,7 @@ import { saveContent } from '../../open-authoring/github/api'
 import { getCachedFormData, setCachedFormData } from '../formCache'
 import { GithubOptions } from '../github/useGithubForm'
 import { FORM_ERROR } from 'final-form'
+import { b64EncodeUnicode } from '../../open-authoring/utils/base64'
 
 type MaybePromise<T> = Promise<T> | T
 
@@ -85,11 +86,13 @@ export class MarkdownCreatorPlugin<FormShape = any, FrontmatterShape = any>
       this.githubOptions.branch,
       fileRelativePath,
       getCachedFormData(fileRelativePath).sha,
-      toMarkdownString({
-        fileRelativePath,
-        frontmatter,
-        markdownBody,
-      }),
+      b64EncodeUnicode(
+        toMarkdownString({
+          fileRelativePath,
+          frontmatter,
+          markdownBody,
+        })
+      ),
       'Update from TinaCMS'
     )
       .then(response => {
