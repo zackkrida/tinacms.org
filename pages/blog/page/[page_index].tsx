@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import styled from 'styled-components'
 import { NextSeo } from 'next-seo'
+import { GetStaticProps } from 'next'
 import getFiles from '../../../utils/github/getFiles'
 import { orderPosts, formatExcerpt, formatDate } from '../../../utils'
 import {
@@ -99,7 +100,11 @@ export async function unstable_getStaticPaths() {
   return { paths: pages }
 }
 
-export async function getStaticProps({ preview, previewData, ...ctx }) {
+export const getStaticProps: GetStaticProps = async function({
+  preview,
+  previewData,
+  ...ctx
+}) {
   const {
     sourceProviderConnection,
     accessToken,

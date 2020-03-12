@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { DynamicLink } from '../components/ui/DynamicLink'
+import { GetStaticProps } from 'next'
 
 import {
   Layout,
@@ -162,7 +163,10 @@ export default function CommunityPage({
  ** DATA FETCHING -----------------------------------------------
  */
 
-export async function getStaticProps({ preview, previewData }) {
+export const getStaticProps: GetStaticProps = async function({
+  preview,
+  previewData,
+}) {
   const {
     sourceProviderConnection,
     accessToken,

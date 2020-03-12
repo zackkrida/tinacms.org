@@ -1,5 +1,6 @@
 import styled from 'styled-components'
 import { NextSeo } from 'next-seo'
+import { GetStaticProps } from 'next'
 import { CloseIcon, EditIcon } from '@tinacms/icons'
 import { formatDate } from '../../utils'
 import {
@@ -108,7 +109,11 @@ export default function BlogTemplate({
  ** DATA FETCHING --------------------------------------------------
  */
 
-export async function getStaticProps({ preview, previewData, ...ctx }) {
+export const getStaticProps: GetStaticProps = async function({
+  preview,
+  previewData,
+  ...ctx
+}) {
   const { slug } = ctx.params
 
   const {

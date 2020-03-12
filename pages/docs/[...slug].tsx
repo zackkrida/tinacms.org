@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { NextSeo } from 'next-seo'
+import { GetStaticProps } from 'next'
 import {
   DocsLayout,
   MarkdownContent,
@@ -102,7 +103,7 @@ export default function DocTemplate(props) {
  * DATA FETCHING ------------------------------------------------------
  */
 
-export async function getStaticProps(props) {
+export const getStaticProps: GetStaticProps = async function(props) {
   let { slug: slugs } = props.params
 
   const slug = slugs.join('/')
