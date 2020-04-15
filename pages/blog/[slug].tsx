@@ -2,6 +2,7 @@ import styled from 'styled-components'
 import { NextSeo } from 'next-seo'
 import { GetStaticProps, GetStaticPaths } from 'next'
 import { CloseIcon, EditIcon } from '@tinacms/icons'
+import { useCMS } from 'tinacms'
 import { formatDate } from '../../utils'
 import {
   Layout,
@@ -33,6 +34,8 @@ function BlogTemplate({
   if (!markdownFile) {
     return <Error statusCode={404} />
   }
+
+  const cms = useCMS()
 
   // Registers Tina Form
   const [data, form] = useGithubMarkdownForm(
@@ -92,7 +95,23 @@ function BlogTemplate({
               </MetaWrap>
               <EditLink isEditMode={editMode} />
             </BlogMeta>
-            <InlineWysiwyg name="markdownBody">
+            <InlineWysiwyg
+              name="markdownBody"
+              imageProps={{
+                async upload(files) {
+                  const directory = '/public/img/blog'
+
+                  let media = await cms.media.store.persist(
+                    files.map(file => ({
+                      directory,
+                      file,
+                    }))
+                  )
+
+                  return media.map(m => `/img/blog/${m.filename}`)
+                },
+              }}
+            >
               <MarkdownContent escapeHtml={false} content={markdownBody} />
             </InlineWysiwyg>
           </RichTextWrapper>
